@@ -23,7 +23,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'octokit', '~> 3.5.0'
   gem.add_dependency 'thor', '~> 0.19.0'
   gem.add_dependency 'virtus', '~> 1.0.0'
-  gem.add_dependency 'grape', '~> 0.10.0'
+  gem.add_dependency 'grape', '~> 0.13.0'
   gem.add_dependency 'grape-swagger', '~> 0.9.0'
   gem.add_dependency 'roar', '~> 0.12.0'
   gem.add_dependency 'statsd-ruby', '~> 1.2.0'
