@@ -14,6 +14,11 @@ module Napa
       def logger
         unless @logger
           @logger = Logging.logger["[#{name}]"]
+
+          # Wrap with ActiveSupport::TaggedLogging
+          # https://github.com/rails/rails/blob/7f18ea14c893cb5c9f04d4fda9661126758332b5/railties/lib/rails/application/bootstrap.rb#L44
+          @logger = ActiveSupport::TaggedLogging.new(@logger)
+
           Napa::Logger::Output::Stdout.new
           Napa::Logger::Output::File.new
         end

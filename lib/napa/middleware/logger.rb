@@ -5,19 +5,53 @@ module Napa
     class Logger
       include Napa::ParamSanitizer
 
-      def initialize(app)
+      # add note in readme
+      # https://github.com/rails/rails/blob/master/railties/lib/rails/application/default_middleware_stack.rb#L58
+      # how to use ths
+      # we could default this to use the request_id or uuid or whatever
+      # the tags have to be:
+      # - methods the Rack::Request responds_to
+      # - objects that respond to to_s
+      # - Proc objects that accept an instance of the Rack::Request
+      def initialize(app, taggers = nil)
         @app = app
+        @taggers = taggers || [ Napa::RequestId.new ]
       end
 
       def call(env)
+        request = Rack::Request.new(env)
+
+        if logger.respond_to?(:tagged)
+          logger.tagged(compute_tags(request)) { call_app(request, env) }
+        else
+          call_app(request, env)
+        end
+      end
+
+      private
+
+      def compute_tags(request)
+        @taggers.collect do |tag|
+          case tag
+          when Proc
+            tag.call(request)
+          when Symbol
+            request.send(tag)
+          else
+            tag
+          end
+        end
+      end
+
+      def call_app(request, env)
         # log the request and set the log level from the configuration
-        Napa::Logger.logger.send(Napa::Logger.config.request_level, format_request(env))
+        logger.send(config.request_level, format_request(request, env))
 
         # process the request
         status, headers, body = @app.call(env)
 
         # log the response and set the log level from the configuration
-        Napa::Logger.logger.send(Napa::Logger.config.response_level, format_response(status, headers, body))
+        logger.send(config.response_level, format_response(status, headers, body))
 
         # return the results
         [status, headers, body]
@@ -26,10 +60,7 @@ module Napa
         Napa::LogTransaction.clear
       end
 
-      private
-
-      def format_request(env)
-        request = Rack::Request.new(env)
+      def format_request(request, env)
         params  = request.params
 
         begin
@@ -56,6 +87,14 @@ module Napa
       def format_response(status, headers, body)
         response_body = body.respond_to?(:body) ? body.body : nil
         Napa::Logger.response(status, headers, response_body)
+      end
+
+      def config
+        Napa::Logger.config
+      end
+
+      def logger
+        Napa::Logger.logger
       end
     end
   end
