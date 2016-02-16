@@ -10,8 +10,16 @@ module Napa
 
         def options
           {}.tap do |o|
-            o[:layout] = Logging.layouts.json if Napa::Logger.config.format == :json
-            o[:layout] = Logging.layouts.yaml if Napa::Logger.config.format == :yaml
+            # binding.pry
+            # Logging::Layouts.pattern()
+
+            o[:layout] = Logging.layouts.pattern(
+              :pattern => '[%d] %-5l %c: %m\n',
+              :color_scheme => 'bright'
+            )
+
+            # o[:layout] = Logging.layouts.json if Napa::Logger.config.format == :json
+            # o[:layout] = Logging.layouts.yaml if Napa::Logger.config.format == :yaml
           end
         end
 

@@ -15,7 +15,7 @@ module Napa
       # - Proc objects that accept an instance of the Rack::Request
       def initialize(app, taggers = nil)
         @app = app
-        @taggers = taggers || [ Napa::RequestId.new ]
+        # @taggers = taggers || [ Napa::RequestId.new ]
       end
 
       def call(env)

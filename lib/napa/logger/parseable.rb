@@ -17,6 +17,7 @@ module Logging
       # Returns the formatted Object.
       #
       def format_obj(obj)
+        binding.pry #asdf
         case obj
         when Exception
           h = { class: obj.class.name,
